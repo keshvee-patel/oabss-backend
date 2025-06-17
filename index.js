@@ -40,7 +40,17 @@ function calculateOABSS(responses) {
   return { score, severity, recommendation };
 }
 
-// POST endpoint to receive city + answers
+// ✅ GET route for home page
+app.get('/', (req, res) => {
+  res.send('✅ OABSS Backend is running. Use POST /submit to submit form data.');
+});
+
+// ✅ GET route for /submit (for browser)
+app.get('/submit', (req, res) => {
+  res.send('🔗 This is the /submit endpoint. Please use POST method to send form data.');
+});
+
+// ✅ POST endpoint to receive city + answers
 app.post('/submit', (req, res) => {
   const { city, responses } = req.body;
 
@@ -60,3 +70,4 @@ app.post('/submit', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ OABSS backend running at http://localhost:${PORT}`);
 });
+
