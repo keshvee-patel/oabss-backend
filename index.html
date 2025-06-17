@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OAB Symptom Score</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <h2 class="text-center mb-4">Overactive Bladder Symptom Score (OABSS)</h2>
+    
+    <form id="oab-form" class="bg-white p-4 rounded shadow-sm">
+      <div class="mb-3">
+        <label class="form-label">Your City</label>
+        <input type="text" class="form-control" id="city" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">1. How often do you feel a strong urge to urinate immediately?</label>
+        <select class="form-select" required>
+          <option value="0">Never (0)</option>
+          <option value="1">Less than once a week (1)</option>
+          <option value="2">A few times a week (2)</option>
+          <option value="3">Once daily (3)</option>
+          <option value="4">Multiple times daily (4)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">2. How many times do you typically urinate during the day?</label>
+        <select class="form-select" required>
+          <option value="0">Less than 7 times (0)</option>
+          <option value="1">8–10 times (1)</option>
+          <option value="2">11–13 times (2)</option>
+          <option value="3">14–16 times (3)</option>
+          <option value="4">More than 16 times (4)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">3. How often do you wake up at night to urinate?</label>
+        <select class="form-select" required>
+          <option value="0">Never (0)</option>
+          <option value="1">Once (1)</option>
+          <option value="2">Twice (2)</option>
+          <option value="3">Three times (3)</option>
+          <option value="4">Four or more times (4)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">4. Do you experience sudden urges that result in urine leakage?</label>
+        <select class="form-select" required>
+          <option value="0">Never (0)</option>
+          <option value="1">Rarely (1)</option>
+          <option value="2">Occasionally (2)</option>
+          <option value="3">Often (3)</option>
+          <option value="4">Always (4)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">5. How much does this affect your daily life (work, social activities, sleep)?</label>
+        <select class="form-select" required>
+          <option value="0">Not at all (0)</option>
+          <option value="1">Slightly (1)</option>
+          <option value="2">Moderately (2)</option>
+          <option value="3">Significantly (3)</option>
+          <option value="4">Extremely (4)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+
+    <div id="result" class="mt-4 p-4 border rounded bg-white d-none">
+      <h4 class="text-success">Result</h4>
+      <p><strong>City:</strong> <span id="res-city"></span></p>
+      <p><strong>Total Score:</strong> <span id="res-score"></span></p>
+      <p><strong>Severity:</strong> <span id="res-severity"></span></p>
+      <p><strong>Recommendation:</strong> <span id="res-recommendation"></span></p>
+      <button class="btn btn-secondary mt-2" onclick="downloadPDF()">Download as PDF</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('oab-form');
+    const resultBox = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const city = document.getElementById('city').value;
+      const selects = form.querySelectorAll('select');
+      const responses = Array.from(selects).map(sel => parseInt(sel.value));
+
+      const res = await fetch('http://localhost:3000/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city, responses })
+      });
+
+      const data = await res.json();
+      document.getElementById('res-city').innerText = data.city;
+      document.getElementById('res-score').innerText = data.score;
+      document.getElementById('res-severity').innerText = data.severity;
+      document.getElementById('res-recommendation').innerText = data.recommendation;
+
+      resultBox.classList.remove('d-none');
+    });
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("OABSS Report", 20, 20);
+      doc.text("City: " + document.getElementById('res-city').innerText, 20, 30);
+      doc.text("Score: " + document.getElementById('res-score').innerText, 20, 40);
+      doc.text("Severity: " + document.getElementById('res-severity').innerText, 20, 50);
+      doc.text("Recommendation: " + document.getElementById('res-recommendation').innerText, 20, 60);
+      doc.save("OABSS_Report.pdf");
+    }
+  </script>
+</body>
+</html>
