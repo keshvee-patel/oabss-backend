@@ -95,7 +95,7 @@
       const selects = form.querySelectorAll('select');
       const responses = Array.from(selects).map(sel => parseInt(sel.value));
 
-      const res = await fetch('http://localhost:3000/submit', {
+      const res = await fetch('https://oabss-backend-1.onrender.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ city, responses })
